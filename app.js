@@ -1,6 +1,6 @@
-import {translate} from './i18n.js?v=20261105-14';
-import {requestNecessaryStorage} from './storage-notice.js?v=20261105-14';
-import {config} from './config.js?v=20261105-14';
+import {translate} from './i18n.js?v=20261105-15';
+import {requestNecessaryStorage} from './storage-notice.js?v=20261105-15';
+import {config} from './config.js?v=20261105-15';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const dialog=$('#auth-dialog'), studio=$('#studio-dialog');
 let client=null,user=null,profile=null,mode='signup',pendingAction=null,avatarBlob=null,avatarURL=null;
