@@ -1,0 +1,9 @@
+NEXORA STUDIO 0.8.4 – 399 mitgelieferte Sounds
+
+291 eigene Synthesen und 102 externe CC0-Samples (64 bisherige, 38 neue aus Octal Music). Die neuen Quellen sind an Commit 22d222ce36e290ba3792c776811aa9c69dcc8776 gebunden; Dateipfade, Quell- und PCM-Hashes in EXPANSION-SAMPLES.json. Lizenztexte: EXPANSION-LICENSE und EXPANSION-LICENSES.txt im APK-Ordner assets/licenses.
+
+Vier Van-Wiese-Kicks sowie Dragon Studio Bass Drop 3 und SoundReality Open Acoustic Hi-Hat werden auf Grundlage der ausdrücklichen, im Gespräch bestätigten Weitergabe-Freigaben des Auftraggebers vom 01./02.11.2026 mitgeliefert. Dies ist keine CC0-Lizenz und keine unabhängig geprüfte Lizenzurkunde. Siehe VAN-WIESE-FREIGABE.md und NEW-UPLOADS-DECLARATION.json.
+
+Die erneut hochgeladene Van-Wiese-Kick 149795 ist bereits vorhanden und wurde nicht verdoppelt. PUBLIC-ASSET-AUDIT.json bestätigt 399 eindeutige PCM-Hashes.
+
+0.8.4: Alle sechs gemischten FINE-DAY-Aufnahmen wurden wegen hörbaren Gesangs entfernt. Neue Vorlagen verwenden eigene Synthesen und die gesangsfreien Starter-Aufnahmen. Alte Projektverweise werden beim Laden ersetzt; Herkunft und Mapping in SOUND-MIGRATION-0.8.4.json. Acht Claps sind jetzt unabhängige eigene Synthese-Designs (tools/revise_claps.py), CC0. Die Künstlerpräfixe werden in der Oberfläche ausgeblendet; die Herkunftsnachweise bleiben erhalten. Gesamt: 291 eigene Synthesen, 102 externe CC0 und sechs bestätigte Starter-Aufnahmen.
