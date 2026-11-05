@@ -1,5 +1,5 @@
-import {pairs} from './translations.js?v=20261105-13';
-import {runtime} from './site-runtime.js?v=20261105-13';
+import {pairs} from './translations.js?v=20261105-14';
+import {runtime} from './site-runtime.js?v=20261105-14';
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 const forward=new Map(pairs.map(([de,en])=>[normalize(de),en]));
 const backward=new Map(pairs.map(([de,en])=>[normalize(en),de]));
