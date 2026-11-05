@@ -1,14 +1,9 @@
 # ZYNORA Studio
 
-Privates Website-Repository von YorickArlt-art. Die Website ist für GitHub Pages vorbereitet, aber noch nicht veröffentlicht.
+Öffentliche Website für ZYNORA Studio. Hauptadresse: https://www.zynora-studio.com
 
-- Website-Dateien liegen im Repository-Stamm; Einstieg ist `index.html`.
-- `.github/workflows/pages.yml` startet ausschließlich manuell über `workflow_dispatch`. Es gibt keinen automatischen Deploy bei Push.
-- Pages ist aktuell durch den GitHub-Tarif für dieses private Repository gesperrt. Später ist ein passender Tarif oder eine ausdrücklich freigegebene öffentliche Repository-Sichtbarkeit erforderlich. Ein privates Repository bedeutet nicht automatisch eine private Pages-Website.
-- Domain: `zynora-studio.com`, registriert bei hosttech. DNS und Custom Domain wurden nicht geändert.
-- Sampler und Kontoanbindung sind enthalten. Songstudio zeigt einen Entwicklungshinweis. Die Android-APK ist kein Teil dieses Repositorys.
-- Supabase SMTP für `support@zynora-studio.com` ist noch nicht eingerichtet. Keine Zugangsdaten oder Server-Schlüssel in Website-Dateien eintragen.
+Studio-Zugang und APK-Download sind vorläufig gesperrt. Die Website lädt das Studio-Modul nicht; der Supabase-Download-Endpunkt gibt keine Download-Links aus.
 
-Details zur späteren Freischaltung: [SETUP.md](SETUP.md).
+Veröffentlichung über GitHub Pages, manuell über `.github/workflows/pages.yml`. Die Domain liegt bei hosttech. Registrierung und Support-Mailversand werden noch eingerichtet; SMTP für support@zynora-studio.com ist noch nicht aktiv.
 
-Vor öffentlicher Freischaltung: SMTP und Auth-Callbacks, Download-CORS, Löschverfahren, Datenhinweise und letzte visuelle Tests abschließen. Anschließend Veröffentlichung gesondert freigeben und den Workflow manuell ausführen.
+Keine APK, lokalen Backups oder Server-Schlüssel in dieses Repository hochladen. Die Browser-Konfiguration enthält ausschließlich den öffentlichen Supabase-Publishable-Key.
