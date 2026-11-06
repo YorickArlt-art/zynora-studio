@@ -1,7 +1,8 @@
-import {discordAuthorization} from './discord-auth.js?v=20261106-1';
-import {translate} from './i18n.js?v=20261106-1';
-import {requestNecessaryStorage} from './storage-notice.js?v=20261106-1';
-import {config} from './config.js?v=20261106-1';
+import {createBetaAccess} from './beta-access.js?v=20261106-beta1';
+import {discordAuthorization} from './discord-auth.js?v=20261106-beta1';
+import {translate} from './i18n.js?v=20261106-beta1';
+import {requestNecessaryStorage} from './storage-notice.js?v=20261106-beta1';
+import {config} from './config.js?v=20261106-beta1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const dialog=$('#auth-dialog'), studio=$('#studio-dialog');
 let client=null,user=null,profile=null,mode='signup',pendingAction=null,avatarBlob=null,avatarURL=null,deletion=null;
@@ -25,7 +26,7 @@ function route(){const hash=location.hash.slice(1)||'home';const dataLink=['priv
 window.addEventListener('hashchange',route);route();
 async function loadProfile(){if(!client||!user)return;const {data,error}=await client.from('nx_profiles').select('id,username,display_name,avatar_path').eq('id',user.id).maybeSingle();if(error)throw error;profile=data;if(!profile){const name=(user.user_metadata?.username||user.user_metadata?.preferred_username||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24);$('#profile-username').value=name;$('#profile-display').value=(user.user_metadata?.display_name||user.user_metadata?.full_name||name).slice(0,60);}else{$('#profile-username').value=profile.username;$('#profile-display').value=profile.display_name;$('#profile-greeting').dataset.userContent='true';$('#profile-greeting').textContent=profile.display_name||profile.username;if(profile.avatar_path){const {data:picture,error:pictureError}=await client.storage.from('nx-avatars').download(profile.avatar_path);if(!pictureError)showAvatar(picture);}}}
 function showAvatar(blob){if(avatarURL)URL.revokeObjectURL(avatarURL);avatarURL=URL.createObjectURL(blob);const img=document.createElement('img');img.src=avatarURL;img.alt='Dein Profilbild';$('#avatar').replaceChildren(img);}
-async function updateSession(next){deletion=null;$('#account-deletion').hidden=true;user=next?.user||null;if(user)$('#profile-greeting').dataset.userContent='true';else delete $('#profile-greeting').dataset.userContent;profile=null;$('#profile-guest').hidden=!!user;$('#profile-form').hidden=!user;$('#profile-greeting').textContent=user?(user.user_metadata?.username||'kreativer Kopf.'):'kreativer Kopf.';$('#profile-email').textContent=user?.email||'';$('#avatar').textContent='♪';avatarBlob=null;$$('[data-access-note]').forEach(e=>e.hidden=!!user);if(!user){$('#profile-username').value='';$('#profile-display').value='';return;}try{await refreshDeletion();if(!deletion)await loadProfile();}catch(e){message($('#profile-status'),humanError(e),true);}}
+async function updateSession(next){if(user?.id!==next?.user?.id)betaAccess.reset();deletion=null;$('#account-deletion').hidden=true;user=next?.user||null;if(user)$('#profile-greeting').dataset.userContent='true';else delete $('#profile-greeting').dataset.userContent;profile=null;$('#profile-guest').hidden=!!user;$('#profile-form').hidden=!user;$('#profile-greeting').textContent=user?(user.user_metadata?.username||'kreativer Kopf.'):'kreativer Kopf.';$('#profile-email').textContent=user?.email||'';$('#avatar').textContent='♪';avatarBlob=null;$$('[data-access-note]').forEach(e=>e.hidden=!!user);if(!user){$('#profile-username').value='';$('#profile-display').value='';return;}try{await refreshDeletion();if(!deletion){await loadProfile();await betaAccess.refresh();}}catch(e){message($('#profile-status'),humanError(e),true);}}
 async function ensureAccess(action){try{if(!client){toast('Kontoverbindung noch nicht verfügbar. Bitte lade die Seite erneut.');return false;}const {data,error}=await client.auth.getUser();if(error||!data.user){pendingAction=action;openAuth();return false;}if(!data.user.email_confirmed_at){toast('Bitte bestätige zuerst deine E-Mail-Adresse.');return false;}user=data.user;if(!profile){await loadProfile();if(!profile){pendingAction=action;location.hash='profile';message($('#profile-status'),'Wähle zuerst deinen einmaligen Benutzernamen und speichere dein Profil.');return false;}}return true;}catch(error){toast(humanError(error));return false;}}
 $('#auth-form').onsubmit=async e=>{e.preventDefault();if(!client)return message($('#auth-status'),'Kontoverbindung ist noch nicht bereit.',true);const button=$('#auth-submit');button.disabled=true;message($('#auth-status'),'Einen Moment …');try{if(mode==='reset'){const {error}=await client.auth.updateUser({password:$('#auth-password').value});if(error)throw error;closeDialog(dialog);toast('Dein Passwort wurde gespeichert.');}else if(mode==='signup'){const username=$('#auth-username').value.trim().toLowerCase();const {data:available,error:checkError}=await client.rpc('nx_username_available',{p_username:username});if(checkError)throw checkError;if(!available)throw Error('Dieser Benutzername ist nicht verfügbar.');const {data,error}=await client.auth.signUp({email:$('#auth-email').value.trim().toLowerCase(),password:$('#auth-password').value,options:{data:{username,display_name:username},emailRedirectTo:new URL('./',location.href).href}});if(error)throw error;if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0){setMode('login');message($('#auth-status'),'Für diese E-Mail-Adresse besteht bereits ein Konto. Bitte melde dich an oder setze dein Passwort zurück.');return;}message($('#auth-status'),data.session?'Konto erstellt. Bitte vervollständige dein Profil.':'Wenn deine E-Mail-Adresse noch nicht registriert ist, erhältst du eine Bestätigung. Prüfe dein Postfach und deinen Spam-Ordner. Falls du bereits ein Konto hast, melde dich an oder setze dein Passwort zurück.');if(data.session){await updateSession(data.session);closeDialog(dialog);location.hash='profile';}}else{const {data,error}=await client.auth.signInWithPassword({email:$('#auth-email').value.trim().toLowerCase(),password:$('#auth-password').value});if(error)throw error;await updateSession(data.session);closeDialog(dialog);toast('Willkommen bei ZYNORA.');if(profile&&pendingAction){const action=pendingAction;pendingAction=null;await action();}else location.hash='profile';}}catch(error){message($('#auth-status'),humanError(error),true);}finally{button.disabled=false;$('#auth-password').value='';}};
 $('#forgot-password').onclick=async()=>{if(!client)return;const email=$('#auth-email');if(!email.reportValidity())return;const {error}=await client.auth.resetPasswordForEmail(email.value.trim().toLowerCase(),{redirectTo:new URL('./',location.href).href});message($('#auth-status'),error?humanError(error):'Falls ein Konto existiert, wurde ein Link zum Zurücksetzen angefordert. Bitte prüfe dein Postfach und auch deinen Spam-Ordner.',!!error);};
@@ -35,8 +36,27 @@ $('#logout').onclick=async()=>{const {error}=await client.auth.signOut();if(erro
 async function download(){message($('#download-status'),translate('APK downloads are not available yet. We are preparing the launch.'));}
 $('#download-apk').onclick=download;
 let studioModule;
-async function startStudio(){toast(translate('The online studio is not available yet. We are preparing the launch.'));}
-$('#open-studio').onclick=startStudio;studio.addEventListener('close',()=>{studioModule?.stop();studioModule?.flush().catch(()=>{});if(document.fullscreenElement===studio)document.exitFullscreen().catch(()=>{});});
+const betaAccess=createBetaAccess({getClient:()=>client,getUser:()=>user,onDenied:()=>{studioModule?.stop();if(studio.open)closeDialog(studio);}});
+let studioStarting=false;
+async function startStudio(){
+ if(studioStarting)return;
+ if(!user||!betaAccess.isAllowed()){toast(translate('Beta access required. Please sign in with your invited Discord account.'));return;}
+ studioStarting=true;
+ const identity=user.id;
+ // Request fullscreen in the click gesture, before the authorization network call.
+ studio.showModal();document.body.classList.add('modal-open');studio.classList.add('fullscreen-fallback');
+ $('#choose-sampler').disabled=true;
+ $('#studio-menu-status').textContent=translate('Loading sounds and saved projects …');
+ if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().then(()=>{if(!studio.open&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});}).catch(()=>{});
+ try{
+  const source=await betaAccess.bundle();
+  if(!studioModule){const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{studioModule=await import(url);}finally{URL.revokeObjectURL(url);}}
+  if(user?.id!==identity||!studio.open)return;
+  await studioModule.open(identity);
+ }catch(error){if(studio.open)closeDialog(studio);toast(translate('Beta access required. Please sign in with your invited Discord account.'));}
+ finally{studioStarting=false;}
+}
+$('#open-studio').onclick=startStudio;studio.addEventListener('close',()=>{studioModule?.stop();studioModule?.flush().catch(()=>{});if(document.fullscreenElement===document.documentElement)document.exitFullscreen().catch(()=>{});});
 
 $('#resend-confirmation').onclick=async()=>{
  if(!client||!$('#auth-email').reportValidity())return;
@@ -45,7 +65,7 @@ $('#resend-confirmation').onclick=async()=>{
  catch(error){message($('#auth-status'),humanError(error),true);}finally{button.disabled=false;}
 };
 async function refreshDeletion(){
- const {data,error}=await client.rpc('nx_deletion_status');if(error)throw error;deletion=data;
+ const {data,error}=await client.rpc('nx_deletion_status');if(error)throw error;deletion=data;if(deletion)betaAccess.reset();
  $('#account-deletion').hidden=!user;$('#profile-form').hidden=!user||!!deletion;
  $('#request-deletion').hidden=!!deletion;$('#cancel-deletion').hidden=!deletion||deletion.purging;
  $('#deletion-logout').hidden=!deletion;$('#deletion-pending').hidden=!deletion;
@@ -82,5 +102,5 @@ $('#discord-login').onclick=async()=>{
 function finishDiscordSignIn(){try{if(sessionStorage.getItem('zynora-oauth-pending')==='discord'&&user){sessionStorage.removeItem('zynora-oauth-pending');history.replaceState(null,'',location.pathname+'#profile');route();}}catch{}}
 
 async function init(){try{if(!globalThis.supabase?.createClient)throw Error('Die Kontobibliothek konnte nicht geladen werden.');client=globalThis.supabase.createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});client.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{await updateSession(session);if(event==='SIGNED_IN')finishDiscordSignIn();if(event==='PASSWORD_RECOVERY')openAuth('reset');if(event==='SIGNED_OUT'){studioModule?.stop();if(studio.open)closeDialog(studio);}},0);});const {data,error}=await client.auth.getSession();if(error)throw error;await updateSession(data.session);finishDiscordSignIn();if(oauthFailed){try{sessionStorage.removeItem('zynora-oauth-pending');}catch{}history.replaceState(null,'',location.pathname+'#profile');route();await openAuth('login');message($('#auth-status'),'Die Discord-Anmeldung wurde abgebrochen oder ist fehlgeschlagen. Bitte versuche es erneut oder melde dich per E-Mail an.',true);}}catch(error){message($('#profile-status'),humanError(error),true);toast('Kontoverbindung derzeit nicht verfügbar.');}}
-$('#studio-fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(studio.requestFullscreen)studio.requestFullscreen().catch(()=>toast('Dein Browser unterstützt hier keinen Vollbildmodus.'));else toast('Dein Browser unterstützt hier keinen Vollbildmodus.');};
+$('#studio-fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>toast('Dein Browser unterstützt hier keinen Vollbildmodus.'));else toast('Dein Browser unterstützt hier keinen Vollbildmodus.');};
 init();
