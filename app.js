@@ -1,7 +1,7 @@
-import {discordAuthorization} from './discord-auth.js?v=20261105-18';
-import {translate} from './i18n.js?v=20261105-18';
-import {requestNecessaryStorage} from './storage-notice.js?v=20261105-18';
-import {config} from './config.js?v=20261105-18';
+import {discordAuthorization} from './discord-auth.js?v=20261106-1';
+import {translate} from './i18n.js?v=20261106-1';
+import {requestNecessaryStorage} from './storage-notice.js?v=20261106-1';
+import {config} from './config.js?v=20261106-1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const dialog=$('#auth-dialog'), studio=$('#studio-dialog');
 let client=null,user=null,profile=null,mode='signup',pendingAction=null,avatarBlob=null,avatarURL=null,deletion=null;
