@@ -4,11 +4,13 @@ export function createBetaAccess({getClient,getUser,onDenied}){
  const button=document.querySelector('#open-studio');
  const note=document.querySelector('#studio-unavailable');
  const badge=document.querySelector('#beta-version');
+ const description=button.previousElementSibling,initialDescription=description.textContent;
  const render=()=>{
   button.disabled=!allowed;
   button.textContent=translate(allowed?'Open beta version ↗':'Studio coming soon');
   note.textContent=translate(allowed?'Your beta access is active. The sampler is available; Song Studio remains locked.':'The online studio is not available yet. We are preparing the launch.');
   badge.hidden=!allowed;
+  description.textContent=allowed?(document.documentElement.lang==='de'?'16 Parts, 20 Patterns und bis zu 64 Schritte. Importiere eigene Samples, spiele mit Klang und FX und exportiere deinen Groove als WAV.':'16 parts, 20 patterns and up to 64 steps. Import your own samples, shape sound and FX, and export your groove as WAV.'):translate(initialDescription);
  };
  function reset(){revision++;allowed=false;render();onDenied();}
  async function request(part){
