@@ -1,11 +1,13 @@
 # ZYNORA Studio
 
-Öffentliche Website: https://www.zynora-studio.com/
+Public website: https://www.zynora-studio.com/
 
-Zweisprachige Website mit Discord, Support, Bewerbungen und notwendigem Speicherhinweis. Studio-Zugang und APK-Download bleiben vorläufig gesperrt. Keine Download-Links werden erzeugt.
+The sampler beta is restricted to invited Discord identities. Guests and other accounts continue to see the pre-launch notice. Song Studio and APK downloads remain locked.
 
-Konto-E-Mails werden über den signierten Supabase-Hook zynora-auth-email und Resend versendet. Absender: support@zynora-studio.com; Antwortadresse: zynora-studio@outlook.de. Versand und Zustellung wurden am 5. November 2026 geprüft. Die erste Outlook-Testmail lag im Spam-Ordner.
+Administrators can use `/beta-tester person:@member` in the ZYNORA Discord server. The bot stores the grant through the private Supabase integration and sends an English invitation DM. Members sign in through Discord to use their access. Permissions are checked again when the studio opens.
 
-GitHub Pages wird manuell über .github/workflows/pages.yml veröffentlicht. Die Domain liegt bei hosttech. Cloud-Synchronisation, vollständige Android-Portierung und automatische Kontolöschung sind noch nicht aktiv.
+The browser beta currently provides 16 pads, four sequencer tracks, local audio import, local project storage and backup, and WAV export. It is an initial web implementation, not a complete port of the native Android app. Projects are stored on the user's device; cloud sync is not active.
 
-Keine APK, Backups oder Server-Schlüssel hochladen. Die Browser-Konfiguration enthält ausschließlich den öffentlichen Supabase-Schlüssel.
+GitHub Pages publishes the public files from `main` at the repository root. The `CNAME` file preserves the existing custom domain. The manual Actions workflow is retained as a fallback; its artifact names distinguish repeated attempts.
+
+Do not upload the Android APK, backups, private beta source, server secrets, backend source, or local QA fixtures. Client configuration contains only the public Supabase key. The private sampler bundle is served by the authenticated `zynora-beta` Edge Function.
