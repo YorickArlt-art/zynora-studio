@@ -44,6 +44,7 @@ async function startStudio(){
  studioStarting=true;
  const identity=user.id;
  // Request fullscreen in the click gesture, before the authorization network call.
+ $('#studio-menu').hidden=false;$('#sampler-workspace').hidden=true;$('#songstudio-development').hidden=true;
  studio.showModal();document.body.classList.add('modal-open');studio.classList.add('fullscreen-fallback');
  $('#choose-sampler').disabled=true;
  $('#studio-menu-status').textContent=translate('Loading sounds and saved projects …');
