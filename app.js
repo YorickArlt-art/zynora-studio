@@ -1,4 +1,4 @@
-import {initMusic} from './music-player.js?v=20261107-recording2';
+import {initMusic} from './music-player.js?v=20261107-recording3';
 import {createBetaAccess} from './beta-access.js?v=20261107-music1';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
 import {translate} from './i18n.js?v=20261107-music1';
