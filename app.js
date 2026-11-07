@@ -1,4 +1,4 @@
-import {initMusic} from './music-player.js?v=20261107-recording3';
+import {initMusic} from './music-player.js?v=20261107-loops4';
 import {createBetaAccess} from './beta-access.js?v=20261107-music1';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
 import {translate} from './i18n.js?v=20261107-music1';
@@ -108,4 +108,4 @@ async function init(){try{if(!globalThis.supabase?.createClient)throw Error('Die
 $('#studio-fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>toast('Dein Browser unterstützt hier keinen Vollbildmodus.'));else toast('Dein Browser unterstützt hier keinen Vollbildmodus.');};
 init();
 
-initMusic({getClient:()=>client,getUser:()=>user,requestLogin:()=>openAuth('login'),closeStudio:()=>{if(studio.open)closeDialog(studio);}});
+initMusic({hasBetaAccess:()=>betaAccess.refresh(),prepareProjectImport:async()=>{studioModule?.stop();await studioModule?.flush();},projectImported:async id=>{await studioModule?.reloadProject?.(id);},getClient:()=>client,getUser:()=>user,requestLogin:()=>openAuth('login'),closeStudio:()=>{if(studio.open)closeDialog(studio);}});
