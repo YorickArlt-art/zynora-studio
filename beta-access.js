@@ -1,4 +1,4 @@
-import {translate} from './i18n.js?v=20261106-beta1';
+import {translate} from './i18n.js?v=20261107-music1';
 export function createBetaAccess({getClient,getUser,onDenied}){
  let allowed=false,revision=0;
  const button=document.querySelector('#open-studio');
