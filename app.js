@@ -1,4 +1,4 @@
-import {initMusic} from './music-player.js?v=20261108-music-limit1';
+import {initMusic} from './music-player.js?v=20261108-publication-paused1';
 import {createBetaAccess} from './beta-access.js?v=20261108-auth-code1';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
 import {translate} from './i18n.js?v=20261108-auth-code1';
@@ -110,3 +110,4 @@ $('#studio-fullscreen').onclick=()=>{if(document.fullscreenElement)document.exit
 init();
 
 initMusic({hasBetaAccess:()=>betaAccess.refresh(),prepareProjectImport:async()=>{studioModule?.stop();await studioModule?.flush();},projectImported:async id=>{await studioModule?.reloadProject?.(id);},getClient:()=>client,getUser:()=>user,requestLogin:()=>openAuth('login'),closeStudio:()=>{if(studio.open)closeDialog(studio);}});
+
