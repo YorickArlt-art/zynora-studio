@@ -16,6 +16,11 @@ export const musicPairs=[
  ['Wähle Veröffentlichen oder Beides.','Choose Publish or Both.'],
  ['Gib deiner Aufnahme einen Namen, wähle Kategorie und Song oder Loop und bestätige die Veröffentlichung.','Name your recording, choose a category and Song or Loop, then confirm publication.'],
  ['Hier lassen sich keine MP3-Dateien vom Gerät hochladen. Veröffentlichen ist für freigeschaltete Sampler-Betatester verfügbar.','MP3 files cannot be uploaded from your device here. Publishing is available to approved sampler beta testers.'],
- ['Zum Sampler','Go to sampler']
+ ['Zum Sampler','Go to sampler'],
+ ['IN ENTWICKLUNG','IN DEVELOPMENT'],
+ ['Diese Funktion befindet sich aktuell noch in Entwicklung. Das Veröffentlichen eigener Musik wird voraussichtlich in den nächsten Wochen freigeschaltet.','This feature is currently still in development. Publishing your own music is expected to become available in the next few weeks.'],
+ ['Den Music Player und bereits veröffentlichte Musik kannst du weiterhin wie gewohnt nutzen.','You can continue using the Music Player and previously published music as usual.'],
+ ['Verstanden','Understood'],
+ ['Hinweis schließen','Close notice']
 ];
 
