@@ -1,10 +1,11 @@
-import {initMusic} from './music-player.js?v=20261107-loops4';
+import {initMusic} from './music-player.js?v=20261108-music-limit1';
 import {createBetaAccess} from './beta-access.js?v=20261107-music1';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
 import {translate} from './i18n.js?v=20261107-music1';
 import {requestNecessaryStorage} from './storage-notice.js?v=20261107-music1';
 import {config} from './config.js?v=20261107-music1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const musicNavIcon=$('[data-page="music"] .nav-icon');if(musicNavIcon)musicNavIcon.innerHTML='<path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>';
 const dialog=$('#auth-dialog'), studio=$('#studio-dialog');
 let client=null,user=null,profile=null,mode='signup',pendingAction=null,avatarBlob=null,avatarURL=null,deletion=null;
 const message=(element,text,error=false)=>{element.textContent=translate(text);element.classList.toggle('error',error);};
@@ -109,3 +110,4 @@ $('#studio-fullscreen').onclick=()=>{if(document.fullscreenElement)document.exit
 init();
 
 initMusic({hasBetaAccess:()=>betaAccess.refresh(),prepareProjectImport:async()=>{studioModule?.stop();await studioModule?.flush();},projectImported:async id=>{await studioModule?.reloadProject?.(id);},getClient:()=>client,getUser:()=>user,requestLogin:()=>openAuth('login'),closeStudio:()=>{if(studio.open)closeDialog(studio);}});
+
