@@ -1,7 +1,8 @@
-import {pairs as basePairs} from './translations.js?v=20261108-auth-code1';
+import {pairs as basePairs} from './translations.js?v=20261108-email-delivery1';
 import {musicPairs} from './music-translations.js?v=20261108-publication-paused1';
+import {emailFixPairs} from './email-fix-translations.js?v=20261108-email-delivery1';
 import {runtime} from './site-runtime.js?v=20261107-music1';
-const pairs=[...basePairs,...musicPairs];
+const pairs=[...basePairs,...musicPairs,...emailFixPairs];
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 const forward=new Map(pairs.map(([de,en])=>[normalize(de),en]));
 const backward=new Map(pairs.map(([de,en])=>[normalize(en),de]));
