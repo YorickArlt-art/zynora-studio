@@ -1,0 +1,21 @@
+export const musicPairs=[
+ ['DEIN MUSIKPROFIL','YOUR MUSIC PROFILE'],
+ ['Hier siehst und verwaltest du deine veröffentlichten Songs und Loops.','View and manage your published songs and loops here.'],
+ ['Öffentliches Musikprofil ↗','Public music profile ↗'],
+ ['+ Weitere Musik veröffentlichen','+ Publish more music'],
+ ['Du kannst insgesamt bis zu 5 Songs oder Loops veröffentlichen.','You can publish up to 5 songs or loops in total.'],
+ ['Noch keine veröffentlichten Titel. Erstelle deine Musik im Sampler und veröffentliche anschließend deine Aufnahme.','No published titles yet. Create music in the sampler, then publish your recording.'],
+ ['Du hast das Maximum von 5 veröffentlichten Titeln erreicht. Lösche mindestens einen Song oder Loop, bevor du einen weiteren veröffentlichst.','You have reached the limit of 5 published titles. Delete at least one song or loop before publishing another.'],
+ ['Löschen','Delete'],
+ ['UPLOAD-LIMIT','UPLOAD LIMIT'],
+ ['Maximal 5 Titel','Maximum 5 titles'],
+ ['Du kannst maximal 5 Songs oder Loops veröffentlichen. Lösche zuerst mindestens einen Titel unter „Deine Musik“, bevor du weitere Musik veröffentlichst.','You can publish up to 5 songs or loops. Delete at least one title under “Your music” before publishing more music.'],
+ ['Zu deiner Musik','Go to your music'],
+ ['So lädst du deine Musik hoch','How to upload your music'],
+ ['Öffne den Sampler und erstelle deine Musik.','Open the sampler and create your music.'],
+ ['Wähle Veröffentlichen oder Beides.','Choose Publish or Both.'],
+ ['Gib deiner Aufnahme einen Namen, wähle Kategorie und Song oder Loop und bestätige die Veröffentlichung.','Name your recording, choose a category and Song or Loop, then confirm publication.'],
+ ['Hier lassen sich keine MP3-Dateien vom Gerät hochladen. Veröffentlichen ist für freigeschaltete Sampler-Betatester verfügbar.','MP3 files cannot be uploaded from your device here. Publishing is available to approved sampler beta testers.'],
+ ['Zum Sampler','Go to sampler']
+];
+
