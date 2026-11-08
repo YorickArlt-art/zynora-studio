@@ -1,4 +1,4 @@
-import {translate} from './i18n.js?v=20261108-auth-code1';
+import {translate} from './i18n.js?v=20261108-no-language-prompt1';
 export function createBetaAccess({getClient,getUser,onDenied}){
  let allowed=false,revision=0;
  const button=document.querySelector('#open-studio');
@@ -40,3 +40,4 @@ export function createBetaAccess({getClient,getUser,onDenied}){
  setInterval(()=>{if(!document.hidden)refresh();},60000);
  render();return {refresh,reset,bundle,isAllowed:()=>allowed};
 }
+
