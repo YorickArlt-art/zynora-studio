@@ -1,4 +1,4 @@
-import {pairs as basePairs} from './translations.js?v=20261108-music-limit1';
+import {pairs as basePairs} from './translations.js?v=20261108-open-beta1';
 import {musicPairs} from './music-translations.js?v=20261108-music-limit1';
 import {runtime} from './site-runtime.js?v=20261107-music1';
 const pairs=[...basePairs,...musicPairs];
