@@ -1,4 +1,4 @@
-import {translate} from './i18n.js?v=20261108-open-beta1';
+import {translate} from './i18n.js?v=20261108-studio-access1';
 export function createBetaAccess({getClient,getUser,onDenied}){
  let allowed=false,revision=0;
  const button=document.querySelector('#open-studio');
@@ -9,7 +9,7 @@ export function createBetaAccess({getClient,getUser,onDenied}){
   const signedIn=!!getUser();
   button.disabled=false;
   button.textContent=translate('Open beta version ↗');
-  note.textContent=translate(signedIn&&allowed?'You are signed in. The sampler is available; Song Studio remains locked.':'Sign in with email or Discord to open the sampler beta. Song Studio remains locked.');
+  note.textContent=translate(signedIn?(allowed?'You are signed in. The sampler is available; Song Studio remains locked.':'You are signed in. Sampler access is being checked. Song Studio remains locked.'):'Sign in with email or Discord to open the sampler beta. Song Studio remains locked.');
   badge.hidden=false;
   description.textContent=document.documentElement.lang==='de'?'16 Parts, 20 Patterns und bis zu 64 Schritte. Importiere eigene Samples, spiele mit Klang und FX und exportiere deinen Groove als WAV.':'16 parts, 20 patterns and up to 64 steps. Import your own samples, shape sound and FX, and export your groove as WAV.';
  };
@@ -40,4 +40,3 @@ export function createBetaAccess({getClient,getUser,onDenied}){
  setInterval(()=>{if(!document.hidden)refresh();},60000);
  render();return {refresh,reset,bundle,isAllowed:()=>allowed};
 }
-

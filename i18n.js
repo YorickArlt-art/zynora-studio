@@ -1,4 +1,4 @@
-import {pairs as basePairs} from './translations.js?v=20261108-open-beta1';
+import {pairs as basePairs} from './translations.js?v=20261108-studio-access1';
 import {musicPairs} from './music-translations.js?v=20261108-music-limit1';
 import {runtime} from './site-runtime.js?v=20261107-music1';
 const pairs=[...basePairs,...musicPairs];
@@ -26,4 +26,3 @@ async function offerGerman(){let answered=false;try{answered=!!localStorage.getI
  const description=document.querySelector('#language-prompt-description');description.textContent=country==='DE'?'Du scheinst dich in Deutschland zu befinden. Möchtest du die Website auf Deutsch nutzen?':'Dein Browser ist auf Deutsch für Deutschland eingestellt. Möchtest du die Website auf Deutsch nutzen?';
  const show=()=>{if(!document.querySelector('dialog[open]')){prompt.showModal();return true;}return false;};if(!show()){document.addEventListener('close',function retry(){if(show())document.removeEventListener('close',retry,true);},true);}}
 offerGerman();
-
