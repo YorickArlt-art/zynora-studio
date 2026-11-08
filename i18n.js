@@ -1,7 +1,6 @@
 import {pairs as basePairs} from './translations.js?v=20261108-email-delivery1';
 import {musicPairs} from './music-translations.js?v=20261108-publication-paused1';
 import {emailFixPairs} from './email-fix-translations.js?v=20261108-variable-otp1';
-import {runtime} from './site-runtime.js?v=20261107-music1';
 const pairs=[...basePairs,...musicPairs,...emailFixPairs];
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 const forward=new Map(pairs.map(([de,en])=>[normalize(de),en]));
@@ -16,15 +15,7 @@ function translateNode(root){if(root.nodeType===Node.TEXT_NODE){if(!ignored(root
 let queued=false;
 const observer=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;observer.disconnect();translateNode(document.documentElement);observe();});});
 function observe(){observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-label','title','alt','placeholder']});}
-export function setLanguage(next,persist=true){language=next==='de'?'de':'en';document.documentElement.lang=language;observer.disconnect();translateNode(document.documentElement);const select=document.querySelector('#language-select');if(select)select.value=language;if(persist){try{localStorage.setItem('zynora-language',language);localStorage.setItem('zynora-language-prompt','answered');}catch{}}observe();window.dispatchEvent(new CustomEvent('zynora-language-change',{detail:{language}}));}
+export function setLanguage(next,persist=true){language=next==='de'?'de':'en';document.documentElement.lang=language;observer.disconnect();translateNode(document.documentElement);const select=document.querySelector('#language-select');if(select)select.value=language;if(persist){try{localStorage.setItem('zynora-language',language);}catch{}}observe();window.dispatchEvent(new CustomEvent('zynora-language-change',{detail:{language}}));}
 setLanguage(language,false);
 document.querySelector('#language-select')?.addEventListener('change',event=>setLanguage(event.target.value));
-const prompt=document.querySelector('#language-dialog');
-document.querySelector('#language-german')?.addEventListener('click',()=>{setLanguage('de');prompt.close();});
-document.querySelector('#language-english')?.addEventListener('click',()=>{setLanguage('en');prompt.close();});
-async function offerGerman(){let answered=false;try{answered=!!localStorage.getItem('zynora-language')||localStorage.getItem('zynora-language-prompt')==='answered';}catch{}if(answered||language==='de'||!prompt)return;let country=null;try{if(!runtime.regionEndpoint)throw Error('Static hosting');const response=await fetch(runtime.regionEndpoint,{cache:'no-store',signal:AbortSignal.timeout(4000)});if(response.ok)country=(await response.json()).country;}catch{}
- const browserGerman=(navigator.languages||[navigator.language]).some(locale=>/^de-DE$/i.test(locale));const berlin=Intl.DateTimeFormat().resolvedOptions().timeZone==='Europe/Berlin';if(country!=='DE'&&!(country==null&&browserGerman&&berlin))return;
- const description=document.querySelector('#language-prompt-description');description.textContent=country==='DE'?'Du scheinst dich in Deutschland zu befinden. Möchtest du die Website auf Deutsch nutzen?':'Dein Browser ist auf Deutsch für Deutschland eingestellt. Möchtest du die Website auf Deutsch nutzen?';
- const show=()=>{if(!document.querySelector('dialog[open]')){prompt.showModal();return true;}return false;};if(!show()){document.addEventListener('close',function retry(){if(show())document.removeEventListener('close',retry,true);},true);}}
-offerGerman();
 
