@@ -6,5 +6,7 @@ export const emailFixPairs=[
  ['Der E-Mail-Versand der Website hat gerade sein Stundenlimit erreicht. Es wurde kein Code gesendet. Bitte versuche es später erneut.','The website email service has reached its hourly limit. No code was sent. Please try again later.'],
  ['Die Code-E-Mail konnte nicht versendet werden. Es wurde kein Code gesendet. Bitte versuche es später erneut.','The code email could not be sent. No code was sent. Please try again later.'],
  ['Bitte warte kurz, bevor du für diese E-Mail-Adresse einen weiteren Code anforderst.','Please wait briefly before requesting another code for this email address.']
+ ,['Wir haben dir einen Zahlencode per E-Mail gesendet. Gib ihn hier vollständig ein und prüfe auch deinen Spam-Ordner.','We sent you a numeric code by email. Enter the complete code here and also check your spam folder.']
+ ,['Bitte gib den vollständigen Zahlencode aus deiner E-Mail ein.','Please enter the complete numeric code from your email.']
 ];
 
