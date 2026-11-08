@@ -1,12 +1,12 @@
 import {initMusic} from './music-player.js?v=20261108-music-limit1';
-import {createBetaAccess} from './beta-access.js?v=20261107-music1';
+import {createBetaAccess} from './beta-access.js?v=20261108-open-beta1';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
-import {translate} from './i18n.js?v=20261107-music1';
+import {translate} from './i18n.js?v=20261108-open-beta1';
 import {requestNecessaryStorage} from './storage-notice.js?v=20261107-music1';
 import {config} from './config.js?v=20261107-music1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const musicNavIcon=$('[data-page="music"] .nav-icon');if(musicNavIcon)musicNavIcon.innerHTML='<path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>';
-const dialog=$('#auth-dialog'), studio=$('#studio-dialog');
+const dialog=$('#auth-dialog'), studio=$('#studio-dialog'), studioLogin=$('#studio-login-dialog');
 let client=null,user=null,profile=null,mode='signup',pendingAction=null,avatarBlob=null,avatarURL=null,deletion=null;
 const message=(element,text,error=false)=>{element.textContent=translate(text);element.classList.toggle('error',error);};
 let toastTimer;
@@ -43,7 +43,8 @@ const betaAccess=createBetaAccess({getClient:()=>client,getUser:()=>user,onDenie
 let studioStarting=false;
 async function startStudio(){
  if(studioStarting)return;
- if(!user||!betaAccess.isAllowed()){toast(translate('Beta access required. Please sign in with your invited Discord account.'));return;}
+ if(!user){if(!studioLogin.open)studioLogin.showModal();document.body.classList.add('modal-open');return;}
+ if(!betaAccess.isAllowed()&&!await betaAccess.refresh()){toast(translate('Please sign in again.'));return;}
  studioStarting=true;
  const identity=user.id;
  // Request fullscreen in the click gesture, before the authorization network call.
@@ -57,10 +58,10 @@ async function startStudio(){
   if(!studioModule){const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{studioModule=await import(url);}finally{URL.revokeObjectURL(url);}}
   if(user?.id!==identity||!studio.open)return;
   await studioModule.open(identity);
- }catch(error){if(studio.open)closeDialog(studio);toast(translate('Beta access required. Please sign in with your invited Discord account.'));}
+ }catch(error){if(studio.open)closeDialog(studio);toast(translate('The studio could not be opened. Please sign in again.'));}
  finally{studioStarting=false;}
 }
-$('#open-studio').onclick=startStudio;studio.addEventListener('close',()=>{studioModule?.stop();studioModule?.flush().catch(()=>{});if(document.fullscreenElement===document.documentElement)document.exitFullscreen().catch(()=>{});});
+$('#open-studio').onclick=startStudio;$('#studio-login-open-auth').onclick=async()=>{closeDialog(studioLogin);await openAuth('login');};studio.addEventListener('close',()=>{studioModule?.stop();studioModule?.flush().catch(()=>{});if(document.fullscreenElement===document.documentElement)document.exitFullscreen().catch(()=>{});});
 
 $('#resend-confirmation').onclick=async()=>{
  if(!client||!$('#auth-email').reportValidity())return;
