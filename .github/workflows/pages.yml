@@ -1,5 +1,8 @@
 name: Publish prepared website
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 permissions:
   contents: read
