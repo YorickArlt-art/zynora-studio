@@ -46,10 +46,8 @@ let studioStarting=false;
 async function startStudio(){
  if(studioStarting)return;
  if(!user&&client){const {data,error}=await client.auth.getSession();if(!error&&data.session)await updateSession(data.session);}
- if(!user){if(!studioLogin.open)studioLogin.showModal();document.body.classList.add('modal-open');return;}
- if(!betaAccess.isAllowed()&&!await betaAccess.refresh()){toast(translate('Your sign-in is active, but sampler access could not be checked. Please try again.'));return;}
  studioStarting=true;
- const identity=user.id;
+ const identity=user?.id||getGuestStudioIdentity();
  // Request fullscreen in the click gesture, before the authorization network call.
  $('#studio-menu').hidden=false;$('#sampler-workspace').hidden=true;$('#songstudio-development').hidden=true;
  studio.showModal();window.dispatchEvent(new CustomEvent('zynora-studio-open'));document.body.classList.add('modal-open');studio.classList.add('fullscreen-fallback');
@@ -59,10 +57,18 @@ async function startStudio(){
  try{
   const source=await betaAccess.bundle();
   if(!studioModule){const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{studioModule=await import(url);}finally{URL.revokeObjectURL(url);}}
-  if(user?.id!==identity||!studio.open)return;
+  if((user?.id||identity)!==identity||!studio.open)return;
   await studioModule.open(identity);
- }catch(error){if(studio.open)closeDialog(studio);toast(translate('The studio could not be opened. Please sign in again.'));}
+ }catch(error){if(studio.open)closeDialog(studio);toast(translate('The studio could not be opened. Please try again.'));}
  finally{studioStarting=false;}
+}
+function getGuestStudioIdentity(){
+ try{
+  const key='zynora-guest-studio-id';
+  let identity=localStorage.getItem(key);
+  if(!identity){identity='guest-'+crypto.randomUUID();localStorage.setItem(key,identity);}
+  return identity;
+ }catch{return 'guest-studio';}
 }
 $('#open-studio').onclick=startStudio;$('#studio-login-open-auth').onclick=async()=>{closeDialog(studioLogin);await openAuth('login');};studio.addEventListener('close',()=>{studioModule?.stop();studioModule?.flush().catch(()=>{});if(document.fullscreenElement===document.documentElement)document.exitFullscreen().catch(()=>{});});
 
