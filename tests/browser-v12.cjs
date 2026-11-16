@@ -14,12 +14,20 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  await page.goto(ORIGIN);await page.evaluate(()=>localStorage.setItem('zynora-language','de'));await page.reload();
  await page.waitForSelector('.release-gradient');
  console.log('HERO',await page.locator('.release-announcement').innerText());
- console.log('ANIMATION',await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName));
+ console.log('ANIMATION',await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName));const beforeColor=await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).backgroundPosition);await page.waitForTimeout(700);assert.notEqual(await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).backgroundPosition),beforeColor,'Gradient must actually move');
  await page.screenshot({path:path.join(TMP,'home.png'),fullPage:false});
  await page.goto(ORIGIN+'/#open');await page.locator('#open-studio').click();
  if(await page.locator('#storage-dialog').isVisible())await page.locator('#storage-accept').click();
  await page.locator('#choose-sampler').waitFor({state:'visible',timeout:20000});await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
  await page.locator('#ht-song-add').waitFor({state:'visible'});
+ assert.equal(await page.locator('#ht-controls-toggle').getAttribute('aria-expanded'),'false','Mobile toolbar starts collapsed');
+ assert.equal(await page.locator('#ht-name').isVisible(),false,'Project details are tucked away');
+ for(const id of ['ht-play','ht-stop','ht-audio-rec','ht-bpm','ht-song-add'])assert(await page.locator('#'+id).isVisible(),'Essential control visible: '+id);
+ await page.screenshot({path:path.join(TMP,'phone-compact.png')});
+ await page.locator('#ht-controls-toggle').click();await page.waitForTimeout(300);
+ assert.equal(await page.locator('#ht-controls-toggle').getAttribute('aria-expanded'),'true','Disclosure opens');
+ assert.equal(await page.locator('#ht-name').isVisible(),true,'Original project controls available');
+ await page.screenshot({path:path.join(TMP,'phone-expanded.png')});
  console.log('BARS',await page.locator('.ht-projectbar').isVisible(),await page.locator('#ht-stop').isVisible(),await page.locator('#ht-master').isVisible());
  await page.locator('#ht-song-file').setInputFiles(process.env.ZYNORA_TEST_MP3||path.join(TMP,'test-song.mp3'));await page.waitForFunction(()=>window.__qa.getproject()?.song);
  await page.waitForFunction(()=>document.querySelector('#ht-song-add').disabled===false);
@@ -27,6 +35,7 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  console.log('IMPORTED',await page.evaluate(()=>({duration:__qa.engine.buffers.get(__qa.getproject().song.sound).duration,kind:Object.values(__qa.getproject().samples)[0].kind})));
  await page.locator('#ht-play').click();await page.waitForTimeout(700);
  assert.equal(await page.evaluate(()=>__qa.playing()&&!!__qa.engine.graph.songVoice&&__qa.engine.ctx.state==='running'),true,'Backing song must be scheduled in the real audio context');
+ await page.locator('#ht-controls-toggle').click();await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>__qa.playing()&&!!__qa.engine.graph.songVoice),true,'Collapsing controls must not interrupt audio');
  console.log('PLAYBACK',await page.evaluate(()=>({playing:__qa.playing(),song:!!__qa.engine.graph.songVoice,position:__qa.engine.songPosition(__qa.getproject()),state:__qa.engine.ctx.state})));
  await page.locator('#ht-song-toggle').click();await page.locator('#ht-song-start').fill('2');await page.locator('#ht-song-start').dispatchEvent('change');await page.locator('#ht-song-end').fill('6');await page.locator('#ht-song-end').dispatchEvent('change');await page.locator('#ht-song-loop').click();
  await page.locator('#ht-song-volume').fill('40');await page.locator('#ht-song-volume').dispatchEvent('input');
@@ -41,7 +50,7 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>document.querySelector('#choose-sampler')&&!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
  assert.equal(await page.evaluate(()=>!!__qa.engine.buffers.get(__qa.getproject().song.sound)),true,'Reload must restore decoded backing audio');
  console.log('RESTORED',await page.evaluate(()=>({song:__qa.getproject().song,buffer:!!__qa.engine.buffers.get(__qa.getproject().song.sound)})));
- const backup=page.waitForEvent('download');await page.locator('#ht-backup').scrollIntoViewIfNeeded();await page.locator('#ht-backup').click();const d=await backup;await d.saveAs(path.join(TMP,'backup.json'));console.log('BACKUP',fs.statSync(path.join(TMP,'backup.json')).size);
+ await page.locator('#ht-controls-toggle').click();await page.waitForTimeout(300);const backup=page.waitForEvent('download');await page.locator('#ht-backup').scrollIntoViewIfNeeded();await page.locator('#ht-backup').click();const d=await backup;await d.saveAs(path.join(TMP,'backup.json'));console.log('BACKUP',fs.statSync(path.join(TMP,'backup.json')).size);
  await page.locator('#ht-restore').scrollIntoViewIfNeeded();await page.locator('#ht-project-file').setInputFiles(path.join(TMP,'backup.json'));await page.waitForTimeout(500);console.log('BACKUP_RESTORE',await page.evaluate(()=>!!__qa.engine.buffers.get(__qa.getproject().song.sound)));
  console.log('OVERFLOW',await page.evaluate(()=>({screen:innerWidth,page:document.documentElement.scrollWidth,workspace:document.querySelector('#sampler-workspace').scrollWidth,body:document.querySelector('.ht-body').getBoundingClientRect().width})));
  // Existing sequencing and pads still create real voices and editable steps.
@@ -49,11 +58,11 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  assert.equal(await page.evaluate(()=>__qa.getproject().patterns[__qa.getproject().activePattern].rows[0][0]===null),true,'Step toggle must still edit the active pattern');
  await page.locator('[data-ht-view=perform]').click();await page.locator('#ht-pads button').first().dispatchEvent('pointerdown',{pointerId:1});
  assert.equal(await page.evaluate(()=>__qa.engine.voices.size>0),true,'Pads must still trigger real voices');
- const wavDownload=page.waitForEvent('download');await page.locator('#ht-export').scrollIntoViewIfNeeded();await page.locator('#ht-export').click();const wav=await wavDownload;await wav.saveAs(path.join(TMP,'mix.wav'));assert.equal(fs.readFileSync(path.join(TMP,'mix.wav')).subarray(0,4).toString(),'RIFF');
+ if(await page.locator('#ht-controls-toggle').getAttribute('aria-expanded')==='false'){await page.locator('#ht-controls-toggle').click();await page.waitForTimeout(300);}const wavDownload=page.waitForEvent('download');await page.locator('#ht-export').scrollIntoViewIfNeeded();await page.locator('#ht-export').click();const wav=await wavDownload;await wav.saveAs(path.join(TMP,'mix.wav'));assert.equal(fs.readFileSync(path.join(TMP,'mix.wav')).subarray(0,4).toString(),'RIFF');
  for(const width of [320,360,390,430,768,1024]){await page.setViewportSize({width,height:844});const dimensions=await page.evaluate(()=>({view:innerWidth,page:document.documentElement.scrollWidth,workspace:document.querySelector('#sampler-workspace').scrollWidth}));assert(dimensions.page<=width&&dimensions.workspace<=width,'No page overflow at '+width);assert(await page.locator('#ht-song-add').isVisible(),'Add song visible at '+width);}
  await page.setViewportSize({width:390,height:844});
  const previousSong=await page.evaluate(()=>__qa.getproject().song.sound);await page.locator('#ht-song-file').setInputFiles({name:'too-large.mp3',mimeType:'audio/mpeg',buffer:Buffer.alloc(25*1024*1024)});await page.waitForFunction(()=>document.querySelector('#ht-song-add').disabled===false);assert.equal(await page.evaluate(()=>__qa.getproject().song.sound),previousSong,'Rejected oversized file must preserve the original song');
- await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(TMP,'desktop.png')});
+ await page.setViewportSize({width:1440,height:1000});assert.equal(await page.locator('.ht-transport #ht-export').count(),1,'Desktop transport keeps its original controls');assert.equal(await page.locator('#ht-controls-toggle').isVisible(),false,'Desktop needs no disclosure');await page.screenshot({path:path.join(TMP,'desktop.png')});
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName),'none','Reduced motion must stop the gradient animation');
  console.log('ERRORS',errors);await browser.close();server.close();
  if(errors.length)process.exitCode=1;

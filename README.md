@@ -23,3 +23,7 @@ On phones, the project, transport and pattern bars are horizontally scrollable, 
 Songs stay in IndexedDB on the device with their project and are included in project backup/restore. Limits: 24 MB per song, 10 minutes and 160 MiB decoded PCM; the existing 96 MB total imported-file limit, 64-file limit and four-minute WAV/recording limit still apply. Existing projects without a backing song remain supported.
 
 Sampler source: `supabase/functions/zynora-beta/sampler-client.js`. Run `node tools/build-sampler.mjs` after edits to regenerate the deployed `sampler-source.mjs`. Deploy it with the existing `zynora-beta` handler and metadata, preserving the handler's private `/grant` authorization. No account, RLS, database or mail configuration is changed by this update.
+
+### Mobile toolbar refinement
+
+On phones the sampler now starts with compact controls: Add song, Play, Stop, Record and BPM remain visible. Use **More** beside Add song to expand project management, pad recording, swing, master level, export, pattern settings and help. These are the same controls with their existing audio handlers; expanding/collapsing does not stop playback. Desktop keeps its original full toolbars. The homepage's 1.2 gradient now has a stronger animated glow; reduced-motion preferences still disable animation.

@@ -1,4 +1,4 @@
-import {translate} from './i18n.js?v=20261116-v12-1';
+import {translate} from './i18n.js?v=20261116-v12-2';
 import {config} from './config.js?v=20261107-music1';
 export function createBetaAccess({getClient,getUser,onDenied}){
  let allowed=false,revision=0;

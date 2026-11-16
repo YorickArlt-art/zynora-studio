@@ -19,3 +19,15 @@ Passed the Chromium end-to-end test against the complete local website and the p
 - Zero browser page errors.
 
 These are desktop Chromium tests with responsive viewports, not physical Samsung or iOS device tests. Speed changes also change pitch. The existing WAV export still renders the selected pattern/chain, and existing capture/export time limits remain in effect. No accounts, email settings, community services, project formats or permissions were replaced.
+
+## Follow-up: compact phone controls
+
+Passed the extended responsive browser test after adding the mobile disclosure:
+
+- Starts collapsed, with all five essential controls visible.
+- Expands to expose the original project, transport and pattern controls.
+- Collapsing during MP3 playback leaves the same audio engine playing.
+- Desktop restores the controls to their original toolbar positions.
+- No horizontal page overflow at 320–1024 pixels.
+- Gradient background position changes over time; reduced motion stops both color and glow animations.
+- The original MP3, loop-editing, local save/restore, pad, sequencer and WAV regression tests still pass, with zero browser errors.
