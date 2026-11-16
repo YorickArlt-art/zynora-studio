@@ -1,7 +1,8 @@
 const {chromium}=require('playwright');const fs=require('fs');const path=require('path');const assert=require('node:assert/strict');const os=require('os');
 const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join(os.tmpdir(),'zynora-v12-qa');fs.mkdirSync(TMP,{recursive:true});
 (async()=>{
- const {source}=await import(require('url').pathToFileURL(path.join(ROOT,'supabase/functions/zynora-beta/sampler-source.mjs')).href);
+ const {source:builtSource}=await import(require('url').pathToFileURL(path.join(ROOT,'supabase/functions/zynora-beta/sampler-source.mjs')).href);
+ const source=process.env.ZYNORA_QA_ORIGINAL_UI==='1'?builtSource.split('// Phone-only presentation layer.')[0]:builtSource;
  const loopAssets=fs.readdirSync(path.join(ROOT,'assets/factory-loops')).filter(f=>f.endsWith('.mp3')).map(f=>({id:f.replace('.mp3',''),name:f,category:'Loops',url:'https://www.zynora-studio.com/assets/factory-loops/'+f}));
  const http=require('http');const types={'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.html':'text/html','.svg':'image/svg+xml','.png':'image/png','.mp3':'audio/mpeg','.json':'application/json'};
  const server=http.createServer((req,res)=>{const rel=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.resolve(ROOT,'.'+(rel==='/'?'/index.html':rel));if(!file.startsWith(ROOT+path.sep)){res.writeHead(403);return res.end();}try{const bytes=fs.readFileSync(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});res.end(bytes);}catch{res.writeHead(404);res.end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));const ORIGIN='http://127.0.0.1:'+server.address().port;
