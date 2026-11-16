@@ -27,3 +27,7 @@ Sampler source: `supabase/functions/zynora-beta/sampler-client.js`. Run `node to
 ### Mobile toolbar refinement
 
 On phones the sampler now starts with compact controls: Add song, Play, Stop, Record and BPM remain visible. Use **More** beside Add song to expand project management, pad recording, swing, master level, export, pattern settings and help. These are the same controls with their existing audio handlers; expanding/collapsing does not stop playback. Desktop keeps its original full toolbars. The homepage's 1.2 gradient now has a stronger animated glow; reduced-motion preferences still disable animation.
+
+### Shared song/sample playback fix
+
+Play resumes the AudioContext from the user's tap, restores a saved backing buffer if necessary, then starts the backing song and the first sequencer step at the same audio-clock timestamp. Import decoding no longer waits for autoplay permission. Adding a new song while a session is playing preserves playback intent across a phone file picker's background/foreground transition and restarts the song and pattern together after import. The song lane now shows Ready, Playing with pattern, Muted, or Ended. Natural song completion retains the final play position; the next Play restarts from the chosen range start.

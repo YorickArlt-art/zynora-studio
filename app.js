@@ -1,7 +1,7 @@
 import {initMusic} from './music-player.js?v=20261108-publication-paused1';
-import {createBetaAccess} from './beta-access.js?v=20261116-v12-compact2';
+import {createBetaAccess} from './beta-access.js?v=20261116-v12-audio3';
 import {discordAuthorization} from './discord-auth.js?v=20261107-music1';
-import {translate} from './i18n.js?v=20261116-v12-2';
+import {translate} from './i18n.js?v=20261116-v12-3';
 import {requestNecessaryStorage} from './storage-notice.js?v=20261107-music1';
 import {config} from './config.js?v=20261107-music1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];

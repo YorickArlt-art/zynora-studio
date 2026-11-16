@@ -31,3 +31,15 @@ Passed the extended responsive browser test after adding the mobile disclosure:
 - No horizontal page overflow at 320–1024 pixels.
 - Gradient background position changes over time; reduced motion stops both color and glow animations.
 - The original MP3, loop-editing, local save/restore, pad, sequencer and WAV regression tests still pass, with zero browser errors.
+
+## Follow-up: shared backing-song and sample output
+
+The touch-browser test now runs with Chromium's normal autoplay policy (no autoplay bypass). It measures the actual live master output with an AnalyserNode, not just the transport label:
+
+- Imported 110 Hz MP3 and an 880 Hz sequenced sample are both present simultaneously in the master spectrum (both peaks above -45 dBFS).
+- Backing-song source and first sequencer voice have the same start timestamp, within one 48 kHz sample.
+- Playing a live pad leaves the existing backing-song voice running.
+- The backing song continues across repeated pattern boundaries.
+- Play restores a missing decoded song buffer from the project's saved MP3 bytes.
+- A simulated phone file-picker visibility transition stops the previous transport; after import the new song and the sequencer resume together.
+- Existing save, backup, loop edits, WAV export and compact-toolbar regression tests still pass.
