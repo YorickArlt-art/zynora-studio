@@ -24,6 +24,13 @@ $$('dialog').forEach(d=>d.addEventListener('close',()=>{if(!$$('dialog[open]').l
 $('#privacy-link').onclick=()=>closeDialog(dialog);
 $('#choose-music').onclick=()=>{if(studio.open)closeDialog(studio);location.hash='music';};
 $('#menu-toggle').onclick=()=>{const expanded=$('.navigation').classList.toggle('expanded');$('#menu-toggle').setAttribute('aria-expanded',String(expanded));};
+// The compact menu is only used below the desktop breakpoint.
+const desktopNavigation=matchMedia('(min-width:1024px)');
+function closeNavigation(returnFocus=false){const expanded=$('.navigation').classList.contains('expanded');$('.navigation').classList.remove('expanded');$('#menu-toggle').setAttribute('aria-expanded','false');if(returnFocus&&expanded&&!desktopNavigation.matches)$('#menu-toggle').focus();}
+desktopNavigation.addEventListener('change',()=>closeNavigation());
+document.addEventListener('pointerdown',event=>{if(!event.target.closest('.navigation'))closeNavigation();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('.navigation').classList.contains('expanded')){event.preventDefault();closeNavigation(true);}});
+
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let pageAnimations=[];
 const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.remove('pending');revealObserver.unobserve(entry.target);}}),{threshold:.08});

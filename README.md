@@ -31,3 +31,9 @@ On phones the sampler now starts with compact controls: Add song, Play, Stop, Re
 ### Shared song/sample playback fix
 
 Play resumes the AudioContext from the user's tap, restores a saved backing buffer if necessary, then starts the backing song and the first sequencer step at the same audio-clock timestamp. Import decoding no longer waits for autoplay permission. Adding a new song while a session is playing preserves playback intent across a phone file picker's background/foreground transition and restarts the song and pattern together after import. The song lane now shows Ready, Playing with pattern, Muted, or Ended. Natural song completion retains the final play position; the next Play restarts from the chosen range start.
+
+### Desktop layout correction
+
+The public website shows its navigation links directly from 1024 CSS pixels, with balanced two-row navigation on smaller desktop windows and a single row where there is enough room. The homepage's decorative pad card is compact enough for the first screen, so the studio-opening button remains reachable at common desktop resolutions and Windows display-scaling sizes. The necessary-storage notice uses a compact desktop card on the right. The compact phone navigation and sampler controls are retained; Escape or an outside click closes the phone/tablet site menu.
+
+Checks: `node tests/desktop-layout.cjs` tests German/English at 320–1920 pixels, desktop links, first-screen studio access, resize transitions and compact-menu closing. Existing sampler/audio regression tests remain in `tests/browser-v12.cjs`.
