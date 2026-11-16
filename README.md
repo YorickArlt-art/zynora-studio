@@ -37,3 +37,11 @@ Play resumes the AudioContext from the user's tap, restores a saved backing buff
 The public website shows its navigation links directly from 1024 CSS pixels, with balanced two-row navigation on smaller desktop windows and a single row where there is enough room. The homepage's decorative pad card is compact enough for the first screen, so the studio-opening button remains reachable at common desktop resolutions and Windows display-scaling sizes. The necessary-storage notice uses a compact desktop card on the right. The compact phone navigation and sampler controls are retained; Escape or an outside click closes the phone/tablet site menu.
 
 Checks: `node tests/desktop-layout.cjs` tests German/English at 320–1920 pixels, desktop links, first-screen studio access, resize transitions and compact-menu closing. Existing sampler/audio regression tests remain in `tests/browser-v12.cjs`.
+
+### Flexible Bars und Loop-Sequencer (16.11.2026)
+
+Neue Patterns starten mit 2 Bars auf Smartphones unter 600 CSS-Pixeln und 4 Bars auf Tablets/Computern. Bestehende Pattern-Längen bleiben beim Öffnen und bei Größenänderungen erhalten. Über + lassen sich bis zu 128 Bars ergänzen; × entfernt genau die gewählte Bar samt ihren Steps. Mindestens eine Bar bleibt erhalten. Undo kann das Löschen rückgängig machen.
+
+Unter Loops stehen drei vorhandene Audio-Vorlagen bereit. „Eigenen Loop erstellen“ öffnet einen unabhängigen Step-Sequencer mit Soundauswahl, Sample-Import und bis zu 16 Soundspuren. Save fragt nach dem Namen und aktiviert den Loop. Aktive Loops erscheinen zusätzlich über den normalen Sequencer-Spuren: Step-Loops als direkt bearbeitbare Steps, Audio-Loops als Wellenformen. Sie wiederholen sich über alle Pattern-Bars, auch neu hinzugefügte. Sie werden nur einmal von der Audio-Engine geplant; die Darstellung kopiert keine zusätzlichen Noten in das Pattern. Play startet Pattern, Loops und einen importierten Hintergrundsong über denselben Audio-Takt. Frühere Bereichseinstellungen bleiben über „Weitere Optionen“ zugänglich.
+
+Projektformat 2 bleibt erhalten; ältere Projekte mit 64 gespeicherten Steps pro Spur können weiterhin geladen werden. WAV-Export berücksichtigt aktive Loops. Audio-Loops werden durch Änderung der Wiedergabegeschwindigkeit angepasst, wodurch sich auch ihre Tonhöhe ändert; dies ist kein unabhängiges Time-Stretching.
