@@ -1,0 +1,60 @@
+const {chromium}=require('playwright');const fs=require('fs');const path=require('path');const assert=require('node:assert/strict');const os=require('os');
+const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join(os.tmpdir(),'zynora-v12-qa');fs.mkdirSync(TMP,{recursive:true});
+(async()=>{
+ const {source}=await import(require('url').pathToFileURL(path.join(ROOT,'supabase/functions/zynora-beta/sampler-source.mjs')).href);
+ const loopAssets=fs.readdirSync(path.join(ROOT,'assets/factory-loops')).filter(f=>f.endsWith('.mp3')).map(f=>({id:f.replace('.mp3',''),name:f,category:'Loops',url:'https://www.zynora-studio.com/assets/factory-loops/'+f}));
+ const http=require('http');const types={'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.html':'text/html','.svg':'image/svg+xml','.png':'image/png','.mp3':'audio/mpeg','.json':'application/json'};
+ const server=http.createServer((req,res)=>{const rel=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.resolve(ROOT,'.'+(rel==='/'?'/index.html':rel));if(!file.startsWith(ROOT+path.sep)){res.writeHead(403);return res.end();}try{const bytes=fs.readFileSync(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});res.end(bytes);}catch{res.writeHead(404);res.end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));const ORIGIN='http://127.0.0.1:'+server.address().port;
+ const fixture=process.env.ZYNORA_TEST_MP3||path.join(TMP,'test-song.mp3');if(!fs.existsSync(fixture)){require('child_process').execFileSync('ffmpeg',['-v','error','-y','-f','lavfi','-i','sine=frequency=110:duration=75','-ar','8000','-ac','1','-b:a','64k',fixture]);}
+ const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
+ const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,acceptDownloads:true});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await context.route('https://www.zynora-studio.com/**',async r=>{const u=new URL(r.request().url());const resp=await r.fetch({url:ORIGIN+u.pathname+u.search});await r.fulfill({response:resp});});
+ const testSource='const FACTORY_LOOP_ASSETS='+JSON.stringify(loopAssets)+';\n'+source+'\nwindow.__qa={engine,getproject:()=>project,playing:()=>playing,validateProject,importSong,flush};';
+ await context.route('https://itywthgzirkjtbzvjfqi.supabase.co/**',async r=>{const u=r.request().url();if(u.endsWith('/bundle'))return r.fulfill({json:{source:testSource,sampler:true,song_studio:false}});if(u.endsWith('/status'))return r.fulfill({json:{sampler:true,song_studio:false}});return r.fulfill({json:[]});});
+ await page.goto(ORIGIN);await page.evaluate(()=>localStorage.setItem('zynora-language','de'));await page.reload();
+ await page.waitForSelector('.release-gradient');
+ console.log('HERO',await page.locator('.release-announcement').innerText());
+ console.log('ANIMATION',await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName));
+ await page.screenshot({path:path.join(TMP,'home.png'),fullPage:false});
+ await page.goto(ORIGIN+'/#open');await page.locator('#open-studio').click();
+ if(await page.locator('#storage-dialog').isVisible())await page.locator('#storage-accept').click();
+ await page.locator('#choose-sampler').waitFor({state:'visible',timeout:20000});await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ await page.locator('#ht-song-add').waitFor({state:'visible'});
+ console.log('BARS',await page.locator('.ht-projectbar').isVisible(),await page.locator('#ht-stop').isVisible(),await page.locator('#ht-master').isVisible());
+ await page.locator('#ht-song-file').setInputFiles(process.env.ZYNORA_TEST_MP3||path.join(TMP,'test-song.mp3'));await page.waitForFunction(()=>window.__qa.getproject()?.song);
+ await page.waitForFunction(()=>document.querySelector('#ht-song-add').disabled===false);
+ assert.equal(await page.evaluate(()=>__qa.engine.buffers.get(__qa.getproject().song.sound).duration>60),true,'A whole song must import, beyond the old 60-second sample limit');
+ console.log('IMPORTED',await page.evaluate(()=>({duration:__qa.engine.buffers.get(__qa.getproject().song.sound).duration,kind:Object.values(__qa.getproject().samples)[0].kind})));
+ await page.locator('#ht-play').click();await page.waitForTimeout(700);
+ assert.equal(await page.evaluate(()=>__qa.playing()&&!!__qa.engine.graph.songVoice&&__qa.engine.ctx.state==='running'),true,'Backing song must be scheduled in the real audio context');
+ console.log('PLAYBACK',await page.evaluate(()=>({playing:__qa.playing(),song:!!__qa.engine.graph.songVoice,position:__qa.engine.songPosition(__qa.getproject()),state:__qa.engine.ctx.state})));
+ await page.locator('#ht-song-toggle').click();await page.locator('#ht-song-start').fill('2');await page.locator('#ht-song-start').dispatchEvent('change');await page.locator('#ht-song-end').fill('6');await page.locator('#ht-song-end').dispatchEvent('change');await page.locator('#ht-song-loop').click();
+ await page.locator('#ht-song-volume').fill('40');await page.locator('#ht-song-volume').dispatchEvent('input');
+ await page.waitForTimeout(300);
+ console.log('EDIT',await page.evaluate(()=>({song:__qa.getproject().song,nodeLoop:__qa.engine.graph.songVoice.src.loop,nodeStart:__qa.engine.graph.songVoice.src.loopStart,nodeEnd:__qa.engine.graph.songVoice.src.loopEnd,gain:__qa.engine.graph.songVoice.gain.gain.value})));
+ await page.screenshot({path:path.join(TMP,'phone.png'),fullPage:false});
+ // A backing-only offline export must contain actual audio, not just metadata.
+ const offline=await page.evaluate(async()=>{const p=structuredClone(__qa.getproject());p.parts.forEach(x=>x.mute=true);p.loops.forEach(x=>x.enabled=false);p.song.position=2;const b=await __qa.engine.render(p,[0]);let energy=0;for(const f of b.getChannelData(0))energy+=f*f;return {frames:b.length,energy};});assert(offline.energy>1,'Backing track must be audible in WAV rendering even when all pads/loops are muted');console.log('OFFLINE',offline);
+ // Pause preserves position; stop resets to the selected loop start.
+ await page.locator('#ht-play').click();const paused=await page.evaluate(()=>__qa.getproject().song.position);await page.waitForTimeout(250);console.log('PAUSE',paused,await page.evaluate(()=>__qa.engine.songPosition(__qa.getproject())));
+ await page.locator('#ht-stop').click();console.log('RESET',await page.evaluate(()=>__qa.getproject().song.position));
+ await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>document.querySelector('#choose-sampler')&&!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ assert.equal(await page.evaluate(()=>!!__qa.engine.buffers.get(__qa.getproject().song.sound)),true,'Reload must restore decoded backing audio');
+ console.log('RESTORED',await page.evaluate(()=>({song:__qa.getproject().song,buffer:!!__qa.engine.buffers.get(__qa.getproject().song.sound)})));
+ const backup=page.waitForEvent('download');await page.locator('#ht-backup').scrollIntoViewIfNeeded();await page.locator('#ht-backup').click();const d=await backup;await d.saveAs(path.join(TMP,'backup.json'));console.log('BACKUP',fs.statSync(path.join(TMP,'backup.json')).size);
+ await page.locator('#ht-restore').scrollIntoViewIfNeeded();await page.locator('#ht-project-file').setInputFiles(path.join(TMP,'backup.json'));await page.waitForTimeout(500);console.log('BACKUP_RESTORE',await page.evaluate(()=>!!__qa.engine.buffers.get(__qa.getproject().song.sound)));
+ console.log('OVERFLOW',await page.evaluate(()=>({screen:innerWidth,page:document.documentElement.scrollWidth,workspace:document.querySelector('#sampler-workspace').scrollWidth,body:document.querySelector('.ht-body').getBoundingClientRect().width})));
+ // Existing sequencing and pads still create real voices and editable steps.
+ await page.locator('[data-ht-view=steps]').click();await page.locator('.ht-step').first().click();
+ assert.equal(await page.evaluate(()=>__qa.getproject().patterns[__qa.getproject().activePattern].rows[0][0]===null),true,'Step toggle must still edit the active pattern');
+ await page.locator('[data-ht-view=perform]').click();await page.locator('#ht-pads button').first().dispatchEvent('pointerdown',{pointerId:1});
+ assert.equal(await page.evaluate(()=>__qa.engine.voices.size>0),true,'Pads must still trigger real voices');
+ const wavDownload=page.waitForEvent('download');await page.locator('#ht-export').scrollIntoViewIfNeeded();await page.locator('#ht-export').click();const wav=await wavDownload;await wav.saveAs(path.join(TMP,'mix.wav'));assert.equal(fs.readFileSync(path.join(TMP,'mix.wav')).subarray(0,4).toString(),'RIFF');
+ for(const width of [320,360,390,430,768,1024]){await page.setViewportSize({width,height:844});const dimensions=await page.evaluate(()=>({view:innerWidth,page:document.documentElement.scrollWidth,workspace:document.querySelector('#sampler-workspace').scrollWidth}));assert(dimensions.page<=width&&dimensions.workspace<=width,'No page overflow at '+width);assert(await page.locator('#ht-song-add').isVisible(),'Add song visible at '+width);}
+ await page.setViewportSize({width:390,height:844});
+ const previousSong=await page.evaluate(()=>__qa.getproject().song.sound);await page.locator('#ht-song-file').setInputFiles({name:'too-large.mp3',mimeType:'audio/mpeg',buffer:Buffer.alloc(25*1024*1024)});await page.waitForFunction(()=>document.querySelector('#ht-song-add').disabled===false);assert.equal(await page.evaluate(()=>__qa.getproject().song.sound),previousSong,'Rejected oversized file must preserve the original song');
+ await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(TMP,'desktop.png')});
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName),'none','Reduced motion must stop the gradient animation');
+ console.log('ERRORS',errors);await browser.close();server.close();
+ if(errors.length)process.exitCode=1;
+})().catch(e=>{console.error(e);process.exit(1)});

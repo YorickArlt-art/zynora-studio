@@ -1,4 +1,4 @@
-import {translate} from './i18n.js?v=20261108-no-language-prompt1';
+import {translate} from './i18n.js?v=20261116-v12-1';
 import {config} from './config.js?v=20261107-music1';
 export function createBetaAccess({getClient,getUser,onDenied}){
  let allowed=false,revision=0;
@@ -8,9 +8,9 @@ export function createBetaAccess({getClient,getUser,onDenied}){
  const description=button.previousElementSibling;
  const render=()=>{
    button.disabled=false;
-  button.textContent=translate('Open beta version ↗');
+  button.textContent=translate('Open Zynora Studio ↗');
   note.textContent=translate('The sampler is available without an account. Song Studio remains locked.');
-  badge.hidden=false;
+  badge.hidden=false;badge.textContent='Version 1.2';
   description.textContent=document.documentElement.lang==='de'?'16 Parts, 20 Patterns und bis zu 64 Schritte. Importiere eigene Samples, spiele mit Klang und FX und exportiere deinen Groove als WAV.':'16 parts, 20 patterns and up to 64 steps. Import your own samples, shape sound and FX, and export your groove as WAV.';
  };
  function reset(){revision++;allowed=false;render();onDenied();}

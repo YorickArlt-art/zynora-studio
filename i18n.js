@@ -1,7 +1,8 @@
 import {pairs as basePairs} from './translations.js?v=20261108-email-delivery1';
 import {musicPairs} from './music-translations.js?v=20261108-publication-paused1';
 import {emailFixPairs} from './email-fix-translations.js?v=20261108-variable-otp1';
-const pairs=[...basePairs,...musicPairs,...emailFixPairs];
+const releasePairs=[["ist da.", "is here."], ["Dein Song. Deine Samples. Dein Mix.", "Your song. Your samples. Your mix."], ["+ Song hinzufügen", "+ Add song"], ["Bearbeiten ⌄", "Edit ⌄"], ["Lautstärke", "Volume"], ["Geschwindigkeit", "Speed"], ["Start (Sek.)", "Start (sec.)"], ["Ende (Sek.)", "End (sec.)"], ["Zum Start", "To start"], ["Entfernen", "Remove"], ["Stumm", "Mute"], ["DEIN SONG · DEIN REMIX", "YOUR SONG · YOUR REMIX"], ["Der Song läuft mit Play zusammen mit deinen Pads und Patterns. Start und Ende setzen deinen Loop. Geschwindigkeit verändert auch die Tonhöhe. Die Originaldatei bleibt unverändert. Nur auf diesem Gerät gespeichert.", "Press Play to hear your song with your pads and patterns. Start and end define your loop. Speed also changes pitch. Your original file stays unchanged. Saved only on this device."]];
+const pairs=[...basePairs,...musicPairs,...emailFixPairs,...releasePairs];
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 const forward=new Map(pairs.map(([de,en])=>[normalize(de),en]));
 const backward=new Map(pairs.map(([de,en])=>[normalize(en),de]));
