@@ -20,6 +20,9 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  await page.goto(ORIGIN+'/#open');await page.locator('#open-studio').click();
  if(await page.locator('#storage-dialog').isVisible())await page.locator('#storage-accept').click();
  await page.locator('#choose-sampler').waitFor({state:'visible',timeout:20000});await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ // The new launcher is an intentional extra entry step. Keep the existing editor regressions on their original starter fixture.
+ if(await page.locator('#zp-library').count()){await page.locator('#zp-library').waitFor({state:'visible'});await page.locator('.zp-open').first().click();await page.locator('#sampler-workspace').waitFor({state:'visible'});await page.evaluate(()=>{document.querySelector('#ht-starter').value='hardtekk';document.querySelector('#ht-load-starter').click();});await page.waitForFunction(()=>window.__qa?.getproject()?.name.includes('Hardtekk'));}
+
 
  await page.waitForFunction(()=>window.__qa);
  assert.equal(await page.locator('#ht-pages .ht-bar-chip').count(),2);
@@ -52,7 +55,9 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  await page.locator('#ht-pages .ht-bar-add').click();assert.equal(await page.locator('.ht-loop-step').count(),80);
  await page.locator('#ht-play').click();await page.waitForTimeout(400);assert(await page.evaluate(()=>__qa.playing()));await page.locator('#ht-stop').click();
  const offline=await page.evaluate(async()=>{const p=structuredClone(__qa.getproject());p.song=null;p.parts.forEach(x=>x.mute=true);p.loops.forEach(x=>x.enabled=x.name==='Mein Testloop');const b=await __qa.engine.render(p,[p.activePattern],1);let peak=0;for(const x of b.getChannelData(0))peak=Math.max(peak,Math.abs(x));return peak;});assert(offline>.001,'Fifth loop track actually sounds in offline export');
- await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();await page.waitForFunction(()=>window.__qa);assert(await page.evaluate(()=>__qa.getproject().loops.some(l=>l.name==='Mein Testloop'&&l.tracks.length===5)));
+ const savedProjectId=await page.evaluate(()=>__qa.getproject().id);await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ if(await page.locator('#zp-library').count()){await page.locator('#zp-library').waitFor({state:'visible'});await page.locator('.zp-open[data-project-id="'+savedProjectId+'"]').click();await page.locator('#sampler-workspace').waitFor({state:'visible'});}
+await page.waitForFunction(()=>window.__qa);assert(await page.evaluate(()=>__qa.getproject().loops.some(l=>l.name==='Mein Testloop'&&l.tracks.length===5)));
  await page.locator('[data-ht-view="steps"]').click();await page.screenshot({path:path.join(TMP,'bars-phone.png')});
  await page.setViewportSize({width:1280,height:900});assert.equal(await page.evaluate(()=>__qa.defaultPatternSteps()),64);assert.equal(await page.locator('#ht-pages .ht-bar-chip').count(),3);await page.screenshot({path:path.join(TMP,'bars-desktop.png')});
  assert.equal(await page.evaluate(()=>__qa.validateProject(structuredClone(__qa.getproject())).version),2);

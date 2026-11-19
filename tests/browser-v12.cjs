@@ -20,6 +20,9 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  await page.goto(ORIGIN+'/#open');await page.locator('#open-studio').click();
  if(await page.locator('#storage-dialog').isVisible())await page.locator('#storage-accept').click();
  await page.locator('#choose-sampler').waitFor({state:'visible',timeout:20000});await page.waitForFunction(()=>!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ // The new launcher is an intentional extra entry step. Keep the existing editor regressions on their original starter fixture.
+ if(await page.locator('#zp-library').count()){await page.locator('#zp-library').waitFor({state:'visible'});await page.locator('.zp-open').first().click();await page.locator('#sampler-workspace').waitFor({state:'visible'});await page.evaluate(()=>{document.querySelector('#ht-starter').value='hardtekk';document.querySelector('#ht-load-starter').click();});await page.waitForFunction(()=>window.__qa?.getproject()?.name.includes('Hardtekk'));}
+
  await page.locator('#ht-song-add').waitFor({state:'visible'});
  assert.equal(await page.locator('#ht-controls-toggle').getAttribute('aria-expanded'),'false','Mobile toolbar starts collapsed');
  assert.equal(await page.locator('#ht-name').isVisible(),false,'Project details are tucked away');
@@ -66,7 +69,9 @@ const ROOT=path.resolve(__dirname,'..'),TMP=process.env.ZYNORA_QA_DIR||path.join
  // Pause preserves position; stop resets to the selected loop start.
  await page.locator('#ht-play').click();const paused=await page.evaluate(()=>__qa.getproject().song.position);await page.waitForTimeout(250);console.log('PAUSE',paused,await page.evaluate(()=>__qa.engine.songPosition(__qa.getproject())));
  await page.locator('#ht-stop').click();console.log('RESET',await page.evaluate(()=>__qa.getproject().song.position));
- await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>document.querySelector('#choose-sampler')&&!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ const savedProjectId=await page.evaluate(()=>__qa.getproject().id);await page.evaluate(()=>__qa.flush());await page.reload();await page.locator('#open-studio').click();await page.waitForFunction(()=>document.querySelector('#choose-sampler')&&!document.querySelector('#choose-sampler').disabled);await page.locator('#choose-sampler').click();
+ if(await page.locator('#zp-library').count()){await page.locator('#zp-library').waitFor({state:'visible'});await page.locator('.zp-open[data-project-id="'+savedProjectId+'"]').click();await page.locator('#sampler-workspace').waitFor({state:'visible'});}
+
  assert.equal(await page.evaluate(()=>!!__qa.engine.buffers.get(__qa.getproject().song.sound)),true,'Reload must restore decoded backing audio');
  console.log('RESTORED',await page.evaluate(()=>({song:__qa.getproject().song,buffer:!!__qa.engine.buffers.get(__qa.getproject().song.sound)})));
  await page.locator('#ht-controls-toggle').click();await page.waitForTimeout(300);const backup=page.waitForEvent('download');await page.locator('#ht-backup').scrollIntoViewIfNeeded();await page.locator('#ht-backup').click();const d=await backup;await d.saveAs(path.join(TMP,'backup.json'));console.log('BACKUP',fs.statSync(path.join(TMP,'backup.json')).size);
