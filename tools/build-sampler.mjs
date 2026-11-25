@@ -3,6 +3,7 @@ const root=new URL('../supabase/functions/zynora-beta/',import.meta.url);
 const base=await readFile(new URL('sampler-client.js',root),'utf8');
 const phone=await readFile(new URL('sampler-phone.js',root),'utf8');
 const projects=await readFile(new URL('sampler-projects.js',root),'utf8');
-const source=base+'\n'+phone+'\n'+projects;
+const appearance=await readFile(new URL('sampler-appearance.js',root),'utf8');
+const source=base+'\n'+phone+'\n'+projects+'\n'+appearance;
 await writeFile(new URL('sampler-source.mjs',root),'export const source='+JSON.stringify(source)+';\n');
 console.log('Sampler bundle rebuilt from sampler-client.js.');

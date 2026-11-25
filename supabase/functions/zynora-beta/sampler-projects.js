@@ -69,6 +69,7 @@
  $('#zp-add').onclick=()=>{slots.push(null);storeSlots();render();gridLast();};function gridLast(){const node=$('#zp-grid').lastElementChild;node?.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});node?.querySelector('button')?.focus({preventScroll:true});}
  $('#zp-new').onclick=()=>{let slot=slots.indexOf(null);if(slot<0){slot=slots.length;slots.push(null);storeSlots();}openRecord(null,slot);};
  $('#choose-sampler').onclick=async()=>{while(busy&&dialog.open)await delay(20);if(dialog.open)launch();};back.onclick=returnToLibrary;$('#ht-menu').onclick=returnToLibrary;$('#ht-menu').setAttribute('aria-label',t('Zur Projektübersicht','Back to projects'));
+ dialog.addEventListener('zynora-open-project',async event=>{const id=event.detail?.id,identity=owner;if(typeof id!=='string'||busy)return;try{const available=await listProjects(identity);if(owner!==identity||!dialog.open||workspace.hidden||busy)return;records=available;reconcile(records);render();const slot=slots.indexOf(id);if(slot>=0)openRecord(id,slot);}catch(error){uiStatus(errorText(error),true);}});
  $('#zp-retry').onclick=launch;$('#zp-load-back').onclick=()=>{++token;hide();showMenu();};
  const nativeShowMenu=showMenu;showMenu=function(){++token;hide();nativeShowMenu();};
  dialog.addEventListener('close',()=>{++token;hide();cancelAnimationFrame(progressFrame);});

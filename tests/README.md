@@ -6,6 +6,7 @@ Run from the repository root:
 
 ```sh
 node tools/build-sampler.mjs
+node tests/appearance.cjs
 node tests/project-launcher.cjs
 ZYNORA_QA_ORIGINAL_UI=1 node tests/browser-v12.cjs
 ZYNORA_QA_ORIGINAL_UI=1 node tests/bars-loops.cjs
@@ -23,3 +24,5 @@ The shared-playback regression uses normal browser autoplay restrictions and tou
 The audio and bars suites use their original control layout, because their selectors predate the phone navigation. The full production source, including the new project launcher, is exercised by `project-launcher.cjs` and `phone-ui.cjs`. Editor fixtures enter through the project overview; reload checks reopen the same saved project ID.
 
 The project-launcher suite checks ten lazy project slots, animated progress, creating and renaming projects, safe rendering of user names, additional slots, imported sample bytes and patterns across a full persistent Chromium restart, immediate-close autosave, separate owners, 320/390/768/1440px layouts, storage failure/retry, reduced motion, and closing/reopening while loading. All data belongs to isolated local test browser profiles. No production account or database content is changed.
+
+The appearance update deliberately changes editor pixels on all sizes. The phone suite now verifies the original controls, 16 pads, 20 patterns and workspace accessibility at tablet/desktop sizes rather than requiring byte-identical old-theme screenshots. `appearance.cjs` additionally covers the three preview choices, local persistence, cross-tab changes, storage failures, keyboard isolation, text contrast, six responsive widths, and actual project switching from the desktop sidebar.
