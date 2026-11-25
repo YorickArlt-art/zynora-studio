@@ -47,7 +47,22 @@ $('#profile-form').onsubmit=async e=>{e.preventDefault();if(!user||!client)retur
 $('#logout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return toast(humanError(error));pendingAction=null;closeDialog(studio);await updateSession(null);toast('Du bist abgemeldet.');};
 async function download(){message($('#download-status'),translate('APK downloads are not available yet. We are preparing the launch.'));}
 if($('#download-apk'))$('#download-apk').onclick=download;
-let studioModule;
+let studioModule,studioModuleLoading;
+async function ensureStudioModule(){
+ if(studioModuleLoading)return studioModuleLoading;
+ studioModuleLoading=(async()=>{const source=await betaAccess.bundle();if(!studioModule){const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{studioModule=await import(url);}finally{URL.revokeObjectURL(url);}}return studioModule;})();
+ try{return await studioModuleLoading;}finally{studioModuleLoading=null;}
+}
+async function openSiteAppearance(){
+ if(!window.__zynoraSiteAppearancePending)return;
+ window.__zynoraSiteAppearancePending=false;
+ const button=$('#site-appearance');button.disabled=true;button.setAttribute('aria-busy','true');
+ try{await ensureStudioModule();window.dispatchEvent(new Event('zynora-request-appearance'));}
+ catch{delete window.__zynoraStyleRequest;toast(translate('The studio could not be opened. Please try again.'));}
+ finally{button.disabled=false;button.removeAttribute('aria-busy');}
+}
+window.addEventListener('zynora-open-site-appearance',openSiteAppearance);
+queueMicrotask(openSiteAppearance);
 const betaAccess=createBetaAccess({getClient:()=>client,getUser:()=>user,onDenied:()=>{studioModule?.stop();if(studio.open)closeDialog(studio);}});
 let studioStarting=false;
 async function startStudio(){
@@ -62,8 +77,7 @@ async function startStudio(){
  $('#studio-menu-status').textContent=translate('Loading sounds and saved projects …');
  if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().then(()=>{if(!studio.open&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});}).catch(()=>{});
  try{
-  const source=await betaAccess.bundle();
-  if(!studioModule){const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{studioModule=await import(url);}finally{URL.revokeObjectURL(url);}}
+  await ensureStudioModule();
   if((user?.id||identity)!==identity||!studio.open)return;
   await studioModule.open(identity);
  }catch(error){if(studio.open)closeDialog(studio);toast(translate('The studio could not be opened. Please try again.'));}
