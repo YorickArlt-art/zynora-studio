@@ -9,7 +9,7 @@ async function group(p,text){const d=p.locator('.zsc-group').filter({has:p.locat
 try{
 const {p,c}=await setup({reduced:'no-preference',mobile:true});
 await p.goto('https://www.zynora-studio.com/');
-assert.equal(await p.evaluate(()=>document.documentElement.dataset.zsStyle),'2');
+assert.equal(await p.evaluate(()=>document.documentElement.dataset.zsStyle),'2');assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text');await p.emulateMedia({reducedMotion:'reduce'});assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text','Reduced motion must not paint a background box behind the headline');await p.emulateMedia({reducedMotion:'no-preference'});
 assert.equal(await p.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');
 const original=await p.locator('body > main').allTextContents();
 assert.match(await p.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName),/release-colors/);
