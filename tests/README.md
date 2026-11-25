@@ -6,6 +6,7 @@ Run from the repository root:
 
 ```sh
 node tools/build-sampler.mjs
+node tests/custom-style.cjs
 node tests/appearance.cjs
 node tests/project-launcher.cjs
 ZYNORA_QA_ORIGINAL_UI=1 node tests/browser-v12.cjs
@@ -26,3 +27,5 @@ The audio and bars suites use their original control layout, because their selec
 The project-launcher suite checks ten lazy project slots, animated progress, creating and renaming projects, safe rendering of user names, additional slots, imported sample bytes and patterns across a full persistent Chromium restart, immediate-close autosave, separate owners, 320/390/768/1440px layouts, storage failure/retry, reduced motion, and closing/reopening while loading. All data belongs to isolated local test browser profiles. No production account or database content is changed.
 
 The appearance update deliberately changes editor pixels on all sizes. The phone suite now verifies the original controls, 16 pads, 20 patterns and workspace accessibility at tablet/desktop sizes rather than requiring byte-identical old-theme screenshots. `appearance.cjs` additionally covers the three preview choices, local persistence, cross-tab changes, storage failures, keyboard isolation, text contrast, six responsive widths, and actual project switching from the desktop sidebar.
+
+`custom-style.cjs` verifies the home-page appearance announcement and its direct editor entry, personal palette/gradient/effect controls, real audio graph continuity, JSON style round trips and invalid-import handling, reduced motion, persistence/cross-tab changes and small-screen layout. Personal styles are preferences, not project data.
