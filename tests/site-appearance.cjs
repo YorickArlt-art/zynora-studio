@@ -9,8 +9,8 @@ async function group(p,text){const d=p.locator('.zsc-group').filter({has:p.locat
 try{
 const {p,c}=await setup({reduced:'no-preference',mobile:true});
 await p.goto('https://www.zynora-studio.com/');
-assert.equal(await p.evaluate(()=>document.documentElement.dataset.zsStyle),'2');assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text');await p.emulateMedia({reducedMotion:'reduce'});assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text','Reduced motion must not paint a background box behind the headline');await p.emulateMedia({reducedMotion:'no-preference'});
-assert.equal(await p.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');
+assert.equal(await p.evaluate(()=>document.documentElement.dataset.zsStyle),'custom');assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text');await p.emulateMedia({reducedMotion:'reduce'});assert.equal(await p.locator('.hero h1 span').evaluate(e=>getComputedStyle(e).backgroundClip),'text','Reduced motion must not paint a background box behind the headline');await p.emulateMedia({reducedMotion:'no-preference'});
+assert.equal(await p.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(244, 238, 229)');
 const original=await p.locator('body > main').allTextContents();
 assert.match(await p.locator('.release-gradient').evaluate(e=>getComputedStyle(e).animationName),/release-colors/);
 const pos=await p.locator('.release-gradient').evaluate(e=>getComputedStyle(e).backgroundPosition);
@@ -22,7 +22,7 @@ for(const width of [320,390,768,1024,1366,1920]){
  assert.equal(await p.locator('#site-appearance').evaluate(e=>e.offsetWidth>=44&&e.offsetHeight>=44),true);
  await p.screenshot({path:OUT+'/home-'+width+'.png'});
 }
-checks.push('White/green default before opening sampler; title text and moving animation; header controls do not overlap across six widths');
+checks.push('Warm Sand default before opening sampler; title text and moving animation; header controls do not overlap across six widths');
 await p.setViewportSize({width:390,height:900});await p.locator('#site-appearance').click();await p.locator('#zs-settings[open]').waitFor();assert.equal(await p.locator('#studio-dialog').evaluate(e=>e.open),false);
 assert.equal(await p.evaluate(()=>!!__qa.engine?.graph),false,'Appearance must not initialize audio');
 for(const id of ['1','2','3']){
